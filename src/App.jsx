@@ -1,122 +1,83 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import React, { useState } from "react";
+import ViewSwitcher from "./components/ViewSwitcher";
+import FanView from "./components/FanView";
+import AILayerView from "./components/AILayerView";
+import StaffDashboard from "./components/StaffDashboard";
+import seedReports from "./data/seedReports";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [activeTab, setActiveTab] = useState("fan");
+  const [reports, setReports] = useState(seedReports);
+  const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const [selectedZoneFilter, setSelectedZoneFilter] = useState(null);
+  const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
+
+  // Add new report from fan
+  const addReport = (newReportData) => {
+    const newReport = {
+      id: `rep-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      status: "pending",
+      ...newReportData
+    };
+    
+    // Prepend new report to state
+    setReports((prev) => [newReport, ...prev]);
+    
+    // Simulate AI synthesis process with banner
+    setIsAiAnalyzing(true);
+    setTimeout(() => {
+      setIsAiAnalyzing(false);
+    }, 4500);
+  };
+
+  // Update status (e.g. resolve reports by staff)
+  const updateReportStatus = (id, newStatus) => {
+    setReports((prev) =>
+      prev.map((report) =>
+        report.id === id ? { ...report, status: newStatus } : report
+      )
+    );
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="min-h-screen bg-gray-950 font-sans antialiased text-gray-100 flex flex-col selection:bg-emerald-500 selection:text-gray-950">
+      {/* Top sticky switcher navigation */}
+      <ViewSwitcher activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <div className="ticks"></div>
+      {/* Main active view rendering */}
+      <main className="flex-1 pb-16">
+        {activeTab === "fan" && (
+          <FanView
+            reports={reports}
+            addReport={addReport}
+            selectedLanguage={selectedLanguage}
+            setSelectedLanguage={setSelectedLanguage}
+            selectedZoneFilter={selectedZoneFilter}
+            setSelectedZoneFilter={setSelectedZoneFilter}
+            isAiAnalyzing={isAiAnalyzing}
+            setIsAiAnalyzing={setIsAiAnalyzing}
+          />
+        )}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        {activeTab === "ai" && (
+          <AILayerView reports={reports} />
+        )}
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {activeTab === "staff" && (
+          <StaffDashboard
+            reports={reports}
+            updateReportStatus={updateReportStatus}
+            selectedZoneFilter={selectedZoneFilter}
+            setSelectedZoneFilter={setSelectedZoneFilter}
+          />
+        )}
+      </main>
+
+      {/* Footer */}
+      <footer className="w-full border-t border-gray-900 bg-gray-950 py-6 text-center text-[10px] font-semibold tracking-wider text-gray-600">
+        ⚽ FIFA WORLD CUP 2026 STADIUM PULSE • CROWD-SOURCED INTELLIGENCE
+      </footer>
+    </div>
+  );
 }
-
-export default App
