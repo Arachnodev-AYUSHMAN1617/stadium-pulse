@@ -4,20 +4,103 @@
 
 @layer base {
   body {
+    background-color: #050A1A;
     font-family: 'Inter', sans-serif;
-    background-color: #030712;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+      conic-gradient(
+        from 0deg at 20% 0%,
+        transparent 0deg,
+        rgba(201,168,76,0.03) 2deg,
+        transparent 4deg
+      ),
+      conic-gradient(
+        from 0deg at 80% 0%,
+        transparent 0deg,
+        rgba(201,168,76,0.03) 2deg,
+        transparent 4deg
+      );
+    animation: floodlightScan 20s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #root {
+    position: relative;
+    z-index: 1;
   }
 }
 
-@keyframes pulseOpacity {
-  0%, 100% {
-    fill-opacity: 0.55;
-  }
-  50% {
-    fill-opacity: 0.95;
-  }
+@keyframes floodlightScan {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.pulse-zone {
-  animation: pulseOpacity 1.5s infinite ease-in-out;
+@keyframes zonePulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; filter: drop-shadow(0 0 8px #FF4444); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ticker {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.glass-card {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+}
+
+.gold-glow {
+  box-shadow: 0 0 20px rgba(201,168,76,0.2);
+  border-color: rgba(201,168,76,0.4) !important;
+}
+
+.zone-critical {
+  animation: zonePulse 1.5s ease-in-out infinite;
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.03) 25%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.count-animate {
+  animation: countUp 0.3s ease-out;
+}
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(201,168,76,0.3);
+  border-radius: 2px;
 }

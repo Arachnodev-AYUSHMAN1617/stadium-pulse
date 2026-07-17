@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Radio, AlertTriangle, Trophy } from "lucide-react";
+import { Radio, AlertTriangle } from "lucide-react";
 import ViewSwitcher from "./components/ViewSwitcher";
+import LiveActivityTicker from "./components/LiveActivityTicker";
 import FanView from "./components/FanView";
 import AILayerView from "./components/AILayerView";
 import StaffDashboard from "./components/StaffDashboard";
@@ -13,13 +14,27 @@ export default function App() {
   const [selectedZoneFilter, setSelectedZoneFilter] = useState(null);
   const [geminiLogs, setGeminiLogs] = useState([]);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [fanCount, setFanCount] = useState(41);
 
-  // Clock trigger updating every second
+  // Clock — updates every second
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // Live fan counter — randomly increments/decrements every 3-7 seconds
+  useEffect(() => {
+    const randomDelay = () => Math.floor(Math.random() * 4000) + 3000;
+    let timeout;
+    const tick = () => {
+      setFanCount(prev => {
+        const delta = Math.random() > 0.5 ? 1 : -1;
+        return Math.max(35, Math.min(60, prev + delta));
+      });
+      timeout = setTimeout(tick, randomDelay());
+    };
+    timeout = setTimeout(tick, randomDelay());
+    return () => clearTimeout(timeout);
   }, []);
 
   // Check if API Key is configured
@@ -34,8 +49,6 @@ export default function App() {
       status: "pending",
       ...newReportData
     };
-    
-    // Prepend new report to state
     setReports((prev) => [newReport, ...prev]);
   };
 
@@ -48,39 +61,106 @@ export default function App() {
     );
   };
 
+  const timeStr = currentTime.toTimeString().slice(0, 8);
+
   return (
-    <div className="min-h-screen bg-gray-950 font-sans antialiased text-gray-100 flex flex-col selection:bg-emerald-500 selection:text-gray-950">
-      {/* Header (56px height) */}
-      <header className="h-14 w-full border-b border-gray-800 bg-gray-950 flex items-center justify-between px-4 shrink-0">
-        {/* Left branding */}
-        <div className="flex items-center gap-2">
-          <Radio className="h-5 w-5 text-emerald-400 animate-pulse" />
-          <span className="font-semibold text-white tracking-tight text-base sm:text-lg">
-            Stadium Pulse
-          </span>
-          <span className="rounded bg-gray-800 px-2 py-0.5 text-[9px] font-bold text-gray-500 uppercase tracking-widest border border-gray-700">
+    <div
+      className="min-h-screen flex flex-col antialiased text-white selection:bg-[#C9A84C] selection:text-[#050A1A]"
+      style={{ backgroundColor: "#050A1A" }}
+    >
+      {/* ── Header 64px ── */}
+      <header
+        className="h-16 w-full flex items-center justify-between px-4 sm:px-6 shrink-0 z-50"
+        style={{
+          backgroundColor: "rgba(5,10,26,0.95)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderBottom: "1px solid rgba(255,255,255,0.06)"
+        }}
+      >
+        {/* Left — Branding */}
+        <div className="flex items-center gap-3">
+          <div className="relative flex items-center justify-center">
+            <Radio
+              className="h-5 w-5 relative z-10"
+              style={{ color: "#C9A84C" }}
+            />
+            <span
+              className="absolute h-5 w-5 rounded-full animate-ping opacity-40"
+              style={{ backgroundColor: "#C9A84C" }}
+            />
+          </div>
+          <div className="flex items-center gap-1 tracking-[0.2em] text-sm font-bold uppercase">
+            <span style={{ color: "#C9A84C" }}>STADIUM</span>
+            <span className="text-white">PULSE</span>
+          </div>
+          <span
+            className="rounded-full px-2 py-0.5 text-xs ml-1 font-semibold"
+            style={{
+              backgroundColor: "rgba(201,168,76,0.15)",
+              border: "1px solid rgba(201,168,76,0.3)",
+              color: "#C9A84C"
+            }}
+          >
             FIFA WC 2026
           </span>
         </div>
 
-        {/* Right live clock */}
-        <div className="text-xs text-gray-400 font-mono">
-          {currentTime.toLocaleTimeString()}
+        {/* Center — Live Fan Counter */}
+        <div className="hidden sm:flex items-center gap-2">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-400" />
+          </span>
+          <span className="text-sm" style={{ color: "rgba(255,255,255,0.6)" }}>
+            Live •{" "}
+            <span className="font-semibold text-white">{fanCount}</span> fans
+            reporting
+          </span>
+        </div>
+
+        {/* Right — Clock */}
+        <div className="flex items-center gap-1.5">
+          <span
+            className="font-mono text-sm font-semibold"
+            style={{ color: "#C9A84C" }}
+          >
+            {timeStr}
+          </span>
+          <span
+            className="text-xs font-medium"
+            style={{ color: "rgba(255,255,255,0.3)" }}
+          >
+            IST
+          </span>
         </div>
       </header>
 
-      {/* ViewSwitcher tabs below header */}
+      {/* ── Live Activity Ticker ── */}
+      <LiveActivityTicker />
+
+      {/* ── ViewSwitcher ── */}
       <ViewSwitcher activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      {/* Global Warning Banner if Gemini API Key is missing */}
+      {/* ── API Key Warning Banner ── */}
       {!isApiKeyConfigured && (
-        <div className="bg-amber-500/10 border-b border-amber-500/25 px-4 py-2 text-xs text-amber-400 flex items-center justify-center gap-2">
-          <AlertTriangle className="h-4 w-4 shrink-0 animate-pulse" />
-          <span>Add your Gemini API key to .env to enable AI features</span>
+        <div
+          className="flex items-center justify-center gap-2 px-4 py-2 text-xs"
+          style={{
+            backgroundColor: "rgba(245,158,11,0.08)",
+            borderBottom: "1px solid rgba(245,158,11,0.15)",
+            color: "#F59E0B"
+          }}
+        >
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0 animate-pulse" />
+          <span>
+            Add your Gemini API key to .env to enable AI features — sandbox
+            mode active
+          </span>
         </div>
       )}
 
-      {/* Main content area */}
+      {/* ── Main Content ── */}
       <main className="flex-1">
         {activeTab === "fan" && (
           <FanView
@@ -94,11 +174,7 @@ export default function App() {
             setGeminiLogs={setGeminiLogs}
           />
         )}
-
-        {activeTab === "ai" && (
-          <AILayerView geminiLogs={geminiLogs} />
-        )}
-
+        {activeTab === "ai" && <AILayerView geminiLogs={geminiLogs} />}
         {activeTab === "staff" && (
           <StaffDashboard
             reports={reports}
@@ -109,10 +185,18 @@ export default function App() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="w-full border-t border-gray-900 bg-gray-950 py-4 flex items-center justify-center gap-1.5 text-xs text-gray-600">
-        <span>Stadium Pulse • Built for FIFA World Cup 2026 • Powered by Gemini AI • Jai Johar!</span>
-        <Trophy className="h-3.5 w-3.5 text-gray-700" />
+      {/* ── Footer ── */}
+      <footer
+        className="py-4 text-center tracking-wide"
+        style={{
+          borderTop: "1px solid rgba(255,255,255,0.05)",
+          color: "rgba(255,255,255,0.15)",
+          fontSize: "11px"
+        }}
+      >
+        STADIUM PULSE &nbsp;•&nbsp; FIFA WORLD CUP 2026 &nbsp;•&nbsp; POWERED
+        BY GEMINI AI &nbsp;•&nbsp; JAI JOHAR! 🏟️ &nbsp;•&nbsp; BUILT BY
+        AYUSHMAN SHARMA
       </footer>
     </div>
   );

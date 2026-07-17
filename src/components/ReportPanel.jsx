@@ -10,13 +10,16 @@ import {
   UserX,
   AlertTriangle,
   Loader2,
-  XCircle,
   Compass
 } from "lucide-react";
 import stadiumZones from "../data/stadiumZones";
 import AlertBanner from "./AlertBanner";
 
-// Translations dictionary
+const GOLD = "#C9A84C";
+const GOLD_BG = "rgba(201,168,76,0.10)";
+const GOLD_BORDER = "rgba(201,168,76,0.50)";
+
+// ── Translations (unchanged) ──────────────────────────────────────────────────
 const translations = {
   en: {
     reportTitle: "Report a Condition",
@@ -115,15 +118,15 @@ const translations = {
   }
 };
 
-// Report type buttons with Lucide React Icons
+// ── Report type definitions (unchanged) ──────────────────────────────────────
 const reportTypes = [
   { id: "Crowded Gate", Icon: DoorOpen, translationKeys: { en: "Crowded Gate", hi: "भीड़भाड़ वाला गेट", es: "Puerta Abarrotada", ar: "بوابة مزدحمة", cg: "भीड़भाड़ वाला फाटक" } },
   { id: "Blocked Ramp", Icon: Accessibility, translationKeys: { en: "Blocked Ramp", hi: "अवरुद्ध रैंप", es: "Rampa Bloqueada", ar: "منحدر مغلق", cg: "घेरायल रैंप" } },
   { id: "Full Bin", Icon: Trash2, translationKeys: { en: "Full Bin", hi: "भरा हुआ कचरा डिब्बा", es: "Contenedor Lleno", ar: "سلة مهملات ممتلئة", cg: "कचरा पेटी भरगे" } },
   { id: "Shuttle Delay", Icon: Bus, translationKeys: { en: "Shuttle Delay", hi: "शटल सेवा में देरी", es: "Retraso de Bus", ar: "تأخر الحافلة", cg: "शटल गाड़ी देरी" } },
   { id: "Food Line", Icon: UtensilsCrossed, translationKeys: { en: "Food Line", hi: "भोजन की लंबी कतार", es: "Fila de Comida", ar: "طابور الطعام", cg: "खाए के लाइन" } },
-  { id: "Security Queue", Icon: ShieldAlert, translationKeys: { en: "Security Queue", hi: "सुरक्षा जांच कतार", es: "Fila de Seguridad", ar: "طابور الأمن", cg: "सुरक्षा जांच लाइन" } },
-  { id: "Water Station", Icon: Droplets, translationKeys: { en: "Water Station", hi: "पेयजल केंद्र", es: "Estación de Agua", ar: "محطة मياه", cg: "पानी टंकी" } },
+  { id: "Security Queue", Icon: ShieldAlert, translationKeys: { en: "Security Queue", hi: "सुरक्षा जांच कतार", es: "Fila de Seguridad", ar: "طابور الأमन", cg: "सुरक्षा जांच लाइन" } },
+  { id: "Water Station", Icon: Droplets, translationKeys: { en: "Water Station", hi: "पेयजल केंद्र", es: "Estación de Agua", ar: "محطة مياه", cg: "पानी टंकी" } },
   { id: "Lost Person", Icon: UserX, translationKeys: { en: "Lost Person", hi: "खोया हुआ व्यक्ति", es: "Persona Perdida", ar: "شخص مفقود", cg: "हराय गे मनखे" } }
 ];
 
@@ -146,11 +149,11 @@ export default function ReportPanel({
   const t = translations[selectedLanguage] || translations.en;
   const isRtl = selectedLanguage === "ar";
 
-  // Check if API Key is configured
+  // ── Gemini API key check (logic unchanged) ────────────────────────────────
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   const isApiKeyConfigured = apiKey && apiKey !== "your_key_here";
 
-  // Form submit handler - wires real Gemini API calls
+  // ── Submit handler with Gemini call (logic unchanged) ─────────────────────
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedType || !selectedZone) return;
@@ -191,7 +194,6 @@ Chhattisgarhi phrases for the fanAlert when cg is selected.`;
     let logResponse = null;
 
     if (!isApiKeyConfigured) {
-      // Key missing simulation fallback
       await new Promise(r => setTimeout(r, 2000));
       apiResult = {
         severity: "medium",
@@ -206,25 +208,17 @@ Chhattisgarhi phrases for the fanAlert when cg is selected.`;
         const response = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
           {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              contents: [{
-                parts: [{ text: promptText }]
-              }],
+              contents: [{ parts: [{ text: promptText }] }],
               generationConfig: { temperature: 0.3, maxOutputTokens: 300 }
             })
           }
         );
-
-        if (!response.ok) {
-          throw new Error(`Gemini API error: ${response.statusText}`);
-        }
-
+        if (!response.ok) throw new Error(`Gemini API error: ${response.statusText}`);
         const data = await response.json();
         let rawText = data.candidates[0].content.parts[0].text;
-        
-        // Clean markdown format if returned
         rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
         apiResult = JSON.parse(rawText);
         logResponse = apiResult;
@@ -241,7 +235,6 @@ Chhattisgarhi phrases for the fanAlert when cg is selected.`;
       }
     }
 
-    // Add entry to Gemini live pipeline logs
     const logEntry = {
       timestamp: new Date().toISOString(),
       reportType,
@@ -252,11 +245,9 @@ Chhattisgarhi phrases for the fanAlert when cg is selected.`;
     };
     setGeminiLogs(prev => [logEntry, ...prev]);
 
-    // Save alert data locally
     setAlertData(apiResult);
     setIsLoading(false);
 
-    // Call shared state to insert report with staffAction and severity metadata
     addReport({
       type: reportType,
       zone: selectedZone,
@@ -265,22 +256,19 @@ Chhattisgarhi phrases for the fanAlert when cg is selected.`;
       severity: apiResult.severity
     });
 
-    // Reset inputs
     setSelectedType(null);
     setSelectedZone("");
   };
 
-  // Helper to format time relative to now
+  // ── Helpers (unchanged) ───────────────────────────────────────────────────
   const formatTimeAgo = (isoString) => {
     const elapsed = Date.now() - new Date(isoString).getTime();
     if (elapsed < 10000) return t.justNow;
     const minutes = Math.floor(elapsed / 60000);
     if (minutes < 60) return `${minutes}${t.minAgo}`;
-    const hours = Math.floor(minutes / 60);
-    return `${hours}${t.hrAgo}`;
+    return `${Math.floor(minutes / 60)}${t.hrAgo}`;
   };
 
-  // Filtered reports for feed
   const filteredReports = selectedZoneFilter
     ? reports.filter((r) => r.zone === selectedZoneFilter)
     : reports;
@@ -289,20 +277,21 @@ Chhattisgarhi phrases for the fanAlert when cg is selected.`;
     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
     .slice(0, 5);
 
-  const getSeverityColor = (severity) => {
-    if (!severity) return "text-emerald-400";
+  const getSeverityIconColor = (severity) => {
+    if (!severity) return "#22C55E";
     const s = severity.toLowerCase();
-    if (s === "high") return "text-red-500";
-    if (s === "medium") return "text-amber-400";
-    return "text-emerald-400";
+    if (s === "high") return "#FF4444";
+    if (s === "medium") return "#F59E0B";
+    return "#22C55E";
   };
 
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div
       style={{ direction: isRtl ? "rtl" : "ltr" }}
-      className="relative flex flex-col gap-6 w-full text-white bg-gray-900 border border-gray-800 rounded-2xl p-5"
+      className="relative flex flex-col gap-5 w-full"
     >
-      {/* Alert Banner overlays inside Report Panel container */}
+      {/* Alert Banner overlays top of card */}
       <AlertBanner
         isVisible={isAlertVisible}
         isLoading={isLoading}
@@ -310,137 +299,217 @@ Chhattisgarhi phrases for the fanAlert when cg is selected.`;
         onClose={() => setIsAlertVisible(false)}
       />
 
-      {/* Top Section with Language Selector */}
-      <div className="flex flex-col justify-between items-start gap-4 border-b border-gray-800 pb-4 sm:flex-row sm:items-center">
-        <div>
-          <h2 className="text-lg font-bold tracking-tight text-white">{t.reportTitle}</h2>
-          <p className="text-xs text-gray-400">
-            {selectedZoneFilter
-              ? `${t.filteringZone}: ${stadiumZones.find((z) => z.id === selectedZoneFilter)?.name}`
-              : t.selectCategory}
-          </p>
-        </div>
-
-        {/* Language selector */}
-        <div className="flex flex-wrap gap-1.5 self-end sm:self-auto">
+      {/* ── Language Selector ── */}
+      <div>
+        <p
+          className="mb-2 tracking-widest"
+          style={{ fontSize: "10px", color: "rgba(255,255,255,0.30)" }}
+        >
+          LANGUAGE
+        </p>
+        <div className="flex flex-wrap gap-1.5">
           {[
             { code: "en", label: "EN" },
             { code: "hi", label: "HI" },
             { code: "es", label: "ES" },
             { code: "ar", label: "AR" },
-            { code: "cg", label: "CG", tooltip: "Chhattisgarhi — छत्तीसगढ़ी" }
-          ].map((lang) => (
-            <div key={lang.code} className="relative group/tooltip">
-              <button
-                onClick={() => setSelectedLanguage(lang.code)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all border min-h-[44px] ${
-                  selectedLanguage === lang.code
-                    ? "bg-emerald-500 text-black border-emerald-500 font-bold"
-                    : "bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-700 hover:text-white"
-                }`}
-              >
-                {lang.label}
-              </button>
-              {lang.tooltip && (
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block bg-gray-950 text-white text-[10px] py-1 px-2 rounded border border-gray-800 whitespace-nowrap z-30 shadow-lg font-sans">
-                  {lang.tooltip}
-                </div>
-              )}
-            </div>
-          ))}
+            { code: "cg", label: "CG•छ", tooltip: "Chhattisgarhi — छत्तीसगढ़ी" }
+          ].map((lang) => {
+            const isActive = selectedLanguage === lang.code;
+            return (
+              <div key={lang.code} className="relative group/lang">
+                <button
+                  onClick={() => setSelectedLanguage(lang.code)}
+                  title={lang.tooltip || undefined}
+                  className="rounded-full px-3 py-1 text-xs font-medium transition-all min-h-[36px] cursor-pointer"
+                  style={
+                    isActive
+                      ? {
+                          backgroundColor: GOLD,
+                          border: `1px solid ${GOLD}`,
+                          color: "#050A1A",
+                          fontWeight: 600,
+                          boxShadow: "0 0 20px rgba(201,168,76,0.2)"
+                        }
+                      : {
+                          backgroundColor: "rgba(255,255,255,0.05)",
+                          border: "1px solid rgba(255,255,255,0.10)",
+                          color: "rgba(255,255,255,0.50)"
+                        }
+                  }
+                >
+                  {lang.label}
+                </button>
+                {lang.tooltip && (
+                  <div
+                    className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover/lang:block whitespace-nowrap rounded-lg px-2 py-1 text-[10px] z-30 shadow-xl pointer-events-none"
+                    style={{
+                      backgroundColor: "rgba(5,10,26,0.95)",
+                      border: "1px solid rgba(255,255,255,0.10)",
+                      color: "rgba(255,255,255,0.7)"
+                    }}
+                  >
+                    {lang.tooltip}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Grid of 8 Tap Buttons (Lucide Icons, No Emojis) */}
-      <div className="grid grid-cols-2 gap-3">
-        {reportTypes.map((type) => {
-          const isSelected = selectedType === type.id;
-          const label = type.translationKeys[selectedLanguage] || type.translationKeys.en;
-          const IconComponent = type.Icon;
-
-          return (
-            <button
-              key={type.id}
-              onClick={() => setSelectedType(type.id)}
-              className={`group flex flex-col items-center justify-center gap-2 rounded-xl p-4 text-center transition-all duration-200 border min-h-[44px] ${
-                isSelected
-                  ? "bg-emerald-950 border-emerald-400 text-white shadow-lg"
-                  : "bg-gray-800 border-gray-700 hover:bg-gray-700 hover:border-emerald-500 hover:text-white"
-              }`}
-            >
-              <IconComponent className={`h-6 w-6 transition-transform duration-200 group-hover:scale-110 ${isSelected ? 'text-white' : 'text-emerald-400'}`} />
-              <span className="text-sm font-semibold">{label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Dropdown and Submit panel */}
-      {selectedType && (
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-4 rounded-xl border border-gray-700 bg-gray-800/40 p-4"
+      {/* ── Report Panel Card ── */}
+      <div className="glass-card p-5">
+        <p
+          className="tracking-[0.2em] mb-4"
+          style={{ fontSize: "10px", color: "rgba(255,255,255,0.30)" }}
         >
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-              {t.selectZonePrompt}
-            </label>
+          REPORT A CONDITION
+        </p>
+
+        {/* 8 report type buttons 2×4 */}
+        <div className="grid grid-cols-2 gap-2">
+          {reportTypes.map((type) => {
+            const isSelected = selectedType === type.id;
+            const label = type.translationKeys[selectedLanguage] || type.translationKeys.en;
+            const IconComponent = type.Icon;
+            return (
+              <button
+                key={type.id}
+                onClick={() => setSelectedType(type.id)}
+                className="flex flex-col items-center gap-2 rounded-xl p-3 transition-all duration-200 cursor-pointer min-h-[44px]"
+                style={
+                  isSelected
+                    ? {
+                        backgroundColor: GOLD_BG,
+                        border: `1px solid ${GOLD_BORDER}`,
+                        boxShadow: "0 0 20px rgba(201,168,76,0.15)"
+                      }
+                    : {
+                        backgroundColor: "rgba(255,255,255,0.05)",
+                        border: "1px solid rgba(255,255,255,0.08)"
+                      }
+                }
+                onMouseEnter={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.10)";
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.20)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isSelected) {
+                    e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                  }
+                }}
+              >
+                <IconComponent
+                  className="h-5 w-5"
+                  style={{ color: isSelected ? GOLD : "rgba(255,255,255,0.50)" }}
+                />
+                <span
+                  className="text-xs font-medium text-center leading-tight"
+                  style={{ color: isSelected ? "rgba(255,255,255,0.90)" : "rgba(255,255,255,0.60)" }}
+                >
+                  {label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Zone + Submit form */}
+        {selectedType && (
+          <form onSubmit={handleSubmit} className="mt-3 flex flex-col gap-3">
             <select
               value={selectedZone}
               onChange={(e) => setSelectedZone(e.target.value)}
               required
-              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white focus:border-emerald-500 focus:outline-none min-h-[44px]"
+              className="w-full rounded-lg px-3 py-2 text-sm transition-colors focus:outline-none min-h-[44px]"
+              style={{
+                backgroundColor: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.10)",
+                color: selectedZone ? "#ffffff" : "rgba(255,255,255,0.4)"
+              }}
+              onFocus={(e) => (e.target.style.borderColor = "rgba(201,168,76,0.50)")}
+              onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.10)")}
             >
-              <option value="" disabled>
+              <option value="" disabled style={{ backgroundColor: "#050A1A" }}>
                 {t.chooseZonePlaceholder}
               </option>
               {stadiumZones.map((zone) => (
-                <option key={zone.id} value={zone.id}>
+                <option
+                  key={zone.id}
+                  value={zone.id}
+                  style={{ backgroundColor: "#050A1A", color: "#ffffff" }}
+                >
                   {zone.name}
                 </option>
               ))}
             </select>
-          </div>
 
-          {/* Missing API Key Warning Block inside submit panel if configured incorrectly */}
-          {!isApiKeyConfigured && (
-            <div className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-400">
-              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-              <span>Add your Gemini API key to .env to enable AI features. Simulated responses will be used.</span>
-            </div>
-          )}
+            {/* API key warning */}
+            {!isApiKeyConfigured && (
+              <div
+                className="flex items-start gap-2 rounded-xl px-3 py-2.5 text-xs"
+                style={{
+                  backgroundColor: "rgba(245,158,11,0.08)",
+                  border: "1px solid rgba(245,158,11,0.15)",
+                  color: "#F59E0B"
+                }}
+              >
+                <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                <span>
+                  Add your Gemini API key to .env to enable AI features.
+                  Simulated responses will be used.
+                </span>
+              </div>
+            )}
 
-          <button
-            type="submit"
-            disabled={!selectedZone || isLoading}
-            className={`w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-black transition-all min-h-[44px] ${
-              selectedZone && !isLoading
-                ? "bg-emerald-500 hover:bg-emerald-400 cursor-pointer"
-                : "bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700"
-            }`}
-          >
-            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-            <span>{isLoading ? "Analyzing..." : t.submitBtn}</span>
-          </button>
-        </form>
-      )}
+            <button
+              type="submit"
+              disabled={!selectedZone || isLoading}
+              className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all min-h-[44px]"
+              style={
+                selectedZone && !isLoading
+                  ? {
+                      backgroundColor: GOLD,
+                      color: "#050A1A",
+                      cursor: "pointer"
+                    }
+                  : {
+                      backgroundColor: "rgba(201,168,76,0.50)",
+                      color: "rgba(5,10,26,0.70)",
+                      cursor: "not-allowed"
+                    }
+              }
+            >
+              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              <span>{isLoading ? "Analyzing..." : t.submitBtn}</span>
+            </button>
+          </form>
+        )}
+      </div>
 
-      {/* Recent Intelligence Feed */}
-      <div className="flex flex-col gap-3 rounded-xl border border-gray-800 bg-gray-950 p-4">
-        <div className="flex items-center justify-between">
+      {/* ── Recent Intelligence Feed ── */}
+      <div className="glass-card p-4">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+            <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse inline-block" />
+            <span
+              className="tracking-widest font-semibold"
+              style={{ fontSize: "10px", color: "rgba(255,255,255,0.30)" }}
+            >
+              RECENT INTELLIGENCE
             </span>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">
-              {t.recentFeedTitle}
-            </h3>
+            <span className="text-green-400 text-[10px] font-bold">LIVE</span>
           </div>
           {selectedZoneFilter && (
             <button
               onClick={() => setSelectedZoneFilter(null)}
-              className="text-[10px] font-bold text-sky-400 hover:underline cursor-pointer"
+              className="text-[10px] font-bold cursor-pointer"
+              style={{ color: GOLD }}
             >
               {t.clearFilter}
             </button>
@@ -448,49 +517,69 @@ Chhattisgarhi phrases for the fanAlert when cg is selected.`;
         </div>
 
         {recentReports.length === 0 ? (
-          <p className="py-2 text-center text-xs text-gray-500">{t.noReports}</p>
+          <p
+            className="py-3 text-center text-xs"
+            style={{ color: "rgba(255,255,255,0.25)" }}
+          >
+            {t.noReports}
+          </p>
         ) : (
-          <div className="flex flex-col gap-2">
-            {recentReports.map((report) => {
+          <div>
+            {recentReports.map((report, i) => {
               const zoneObj = stadiumZones.find((z) => z.id === report.zone);
               const typeObj = reportTypes.find((t) => t.id === report.type);
               const typeLabel = typeObj
                 ? typeObj.translationKeys[selectedLanguage] || typeObj.translationKeys.en
                 : report.type;
-
               const Icon = typeObj?.Icon || Compass;
               const isPending = report.status === "pending";
-              const severityColor = getSeverityColor(report.severity);
+              const iconColor = getSeverityIconColor(report.severity);
 
               return (
                 <div
                   key={report.id}
-                  className="flex items-center justify-between rounded-lg border border-gray-800/80 bg-gray-900/60 p-3 transition-colors hover:bg-gray-900/80"
+                  className="flex items-center gap-3 py-2.5"
+                  style={{
+                    borderBottom:
+                      i < recentReports.length - 1
+                        ? "1px solid rgba(255,255,255,0.05)"
+                        : "none"
+                  }}
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon className={`h-4.5 w-4.5 shrink-0 ${severityColor}`} />
-                    <div>
-                      <div className="text-sm font-medium text-white">{typeLabel}</div>
-                      <div className="text-[10px] text-gray-500 mt-0.5">
-                        {zoneObj?.name || report.zone}
-                      </div>
+                  <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: iconColor }} />
+                  <div className="flex-1 min-w-0">
+                    <div
+                      className="text-xs font-medium truncate"
+                      style={{ color: "rgba(255,255,255,0.80)" }}
+                    >
+                      {typeLabel}
+                    </div>
+                    <div
+                      className="text-[10px] mt-0.5 truncate"
+                      style={{ color: "rgba(255,255,255,0.35)" }}
+                    >
+                      {zoneObj?.name || report.zone} •{" "}
+                      {formatTimeAgo(report.timestamp)}
                     </div>
                   </div>
-
-                  <div className="flex flex-col items-end gap-1">
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider border ${
-                        isPending
-                          ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                          : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                      }`}
-                    >
-                      {isPending ? t.pending : t.resolved}
-                    </span>
-                    <span className="text-[9px] text-gray-500">
-                      {formatTimeAgo(report.timestamp)}
-                    </span>
-                  </div>
+                  <span
+                    className="rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap"
+                    style={
+                      isPending
+                        ? {
+                            backgroundColor: "rgba(245,158,11,0.10)",
+                            border: "1px solid rgba(245,158,11,0.20)",
+                            color: "#F59E0B"
+                          }
+                        : {
+                            backgroundColor: "rgba(34,197,94,0.10)",
+                            border: "1px solid rgba(34,197,94,0.20)",
+                            color: "#22C55E"
+                          }
+                    }
+                  >
+                    {isPending ? t.pending : t.resolved}
+                  </span>
                 </div>
               );
             })}
