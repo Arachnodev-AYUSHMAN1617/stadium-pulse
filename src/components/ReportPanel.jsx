@@ -377,7 +377,7 @@ Chhattisgarhi phrases for the fanAlert when cg is selected.`;
               <button
                 key={type.id}
                 onClick={() => setSelectedType(type.id)}
-                className="flex flex-col items-center gap-2 rounded-xl p-3 transition-all duration-200 cursor-pointer min-h-[44px]"
+                className="flex flex-col items-center gap-2 rounded-xl p-3 transition-all duration-150 cursor-pointer min-h-[44px] shimmer-sweep"
                 style={
                   isSelected
                     ? {
@@ -395,12 +395,14 @@ Chhattisgarhi phrases for the fanAlert when cg is selected.`;
                     e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.10)";
                     e.currentTarget.style.borderColor = "rgba(255,255,255,0.20)";
                   }
+                  e.currentTarget.style.transform = "scale(1.02)";
                 }}
                 onMouseLeave={(e) => {
                   if (!isSelected) {
                     e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)";
                     e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
                   }
+                  e.currentTarget.style.transform = "scale(1)";
                 }}
               >
                 <IconComponent
@@ -469,7 +471,7 @@ Chhattisgarhi phrases for the fanAlert when cg is selected.`;
             <button
               type="submit"
               disabled={!selectedZone || isLoading}
-              className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all min-h-[44px]"
+              className="w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all min-h-[44px] shimmer-sweep"
               style={
                 selectedZone && !isLoading
                   ? {

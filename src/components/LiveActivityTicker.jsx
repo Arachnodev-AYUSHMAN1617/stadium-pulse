@@ -1,16 +1,47 @@
 import React from "react";
+import { AlertCircle, CheckCircle, Zap, Leaf, Globe, Trophy } from "lucide-react";
+
+const GOLD = "#C9A84C";
 
 export default function LiveActivityTicker() {
   const items = [
-    "🔴 Gate C — High Congestion",
-    "✅ Gate B — Clear",
-    "⚡ 47 Fans Reporting Live",
-    "🌿 Sustainability Score: 72%",
-    "🌐 5 Languages Active",
-    "🏟️ FIFA WC 2026 — Match Day Operations"
+    { Icon: AlertCircle, color: "#FF4444", text: "Gate C — High Congestion" },
+    { Icon: CheckCircle, color: "#22C55E", text: "Gate B — Clear" },
+    { Icon: Zap, color: GOLD, text: "47 Fans Reporting Live" },
+    { Icon: Leaf, color: "#22C55E", text: "Sustainability Score: 72%" },
+    { Icon: Globe, color: GOLD, text: "5 Languages Active" },
+    { Icon: Trophy, color: GOLD, text: "FIFA WC 2026 — Match Day Operations" }
   ];
 
-  const tickerContent = items.join("   •   ");
+  const Dot = () => (
+    <span
+      style={{
+        display: "inline-block",
+        width: "3px",
+        height: "3px",
+        borderRadius: "50%",
+        backgroundColor: "rgba(201,168,76,0.40)",
+        margin: "0 14px",
+        verticalAlign: "middle"
+      }}
+    />
+  );
+
+  const renderItem = (item, i) => (
+    <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+      <item.Icon style={{ color: item.color, width: "12px", height: "12px", flexShrink: 0 }} />
+      <span>{item.text}</span>
+      {i < items.length - 1 && <Dot />}
+    </span>
+  );
+
+  const content = (
+    <span style={{ display: "inline-flex", alignItems: "center" }}>
+      {items.map(renderItem)}
+      <Dot />
+      {items.map((it, i) => renderItem(it, i + 100))}
+    </span>
+  );
 
   return (
     <div
@@ -31,7 +62,7 @@ export default function LiveActivityTicker() {
           letterSpacing: "0.05em"
         }}
       >
-        {tickerContent}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{tickerContent}
+        {content}&nbsp;&nbsp;&nbsp;&nbsp;
       </div>
     </div>
   );

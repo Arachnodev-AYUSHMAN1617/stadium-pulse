@@ -10,13 +10,13 @@ export default function ViewSwitcher({ activeTab, setActiveTab }) {
 
   return (
     <nav
-      className="w-full overflow-x-auto"
+      className="w-full"
       style={{
         backgroundColor: "rgba(255,255,255,0.02)",
         borderBottom: "1px solid rgba(255,255,255,0.05)"
       }}
     >
-      <div className="flex min-w-max">
+      <div className="flex w-full">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           const TabIcon = tab.Icon;
@@ -24,7 +24,7 @@ export default function ViewSwitcher({ activeTab, setActiveTab }) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="flex items-center gap-2 py-3 px-6 text-sm font-medium transition-colors focus:outline-none whitespace-nowrap min-h-[44px]"
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 text-sm font-medium transition-colors focus:outline-none min-h-[44px]"
               style={{
                 color: isActive ? "#ffffff" : "rgba(255,255,255,0.4)",
                 borderBottom: isActive

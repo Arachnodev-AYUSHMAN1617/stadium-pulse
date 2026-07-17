@@ -37,6 +37,63 @@ export default function App() {
     return () => clearTimeout(timeout);
   }, []);
 
+  // Simulation loop — auto-generates new fan reports every 8-12 seconds
+  useEffect(() => {
+    const ZONES = ["gate-a", "gate-b", "gate-c", "gate-d", "food-court", "parking"];
+    const LANGUAGES = ["en", "es", "ar", "hi", "cg"];
+    const REPORT_TEMPLATES = {
+      "Crowded Gate":  { severity: "high",   staffAction: "Deploy crowd control barriers and open overflow turnstiles." },
+      "Security Queue":{ severity: "high",   staffAction: "Open additional scanning lanes and redirect fans to adjacent gates." },
+      "Blocked Ramp":  { severity: "medium", staffAction: "Clear obstruction on access ramp and verify wheelchair lift operation." },
+      "Lost Person":   { severity: "medium", staffAction: "Broadcast description to zone supervisors and check-in desks." },
+      "Water Station": { severity: "low",    staffAction: "Dispatch refill technician to check pressure valves." },
+      "Full Bin":      { severity: "low",    staffAction: "Dispatch sanitation team to empty bins in the sector." },
+      "Food Line":     { severity: "low",    staffAction: "Open additional registers to reduce waiting times." },
+      "Shuttle Delay": { severity: "medium", staffAction: "Request backup shuttle service for the affected lot." }
+    };
+    const REPORT_TYPES = Object.keys(REPORT_TEMPLATES);
+
+    let addTimeout;
+    const scheduleNextAdd = () => {
+      const delay = Math.floor(Math.random() * 4000) + 8000; // 8-12 seconds
+      addTimeout = setTimeout(() => {
+        const type = REPORT_TYPES[Math.floor(Math.random() * REPORT_TYPES.length)];
+        const zone = ZONES[Math.floor(Math.random() * ZONES.length)];
+        const language = LANGUAGES[Math.floor(Math.random() * LANGUAGES.length)];
+        const template = REPORT_TEMPLATES[type];
+        const newReport = {
+          id: `rep-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          zone,
+          type,
+          timestamp: new Date().toISOString(),
+          language,
+          status: "pending",
+          severity: template.severity,
+          staffAction: template.staffAction
+        };
+        setReports(prev => [newReport, ...prev]);
+        scheduleNextAdd();
+      }, delay);
+    };
+    scheduleNextAdd();
+    return () => clearTimeout(addTimeout);
+  }, []);
+
+  // Auto-resolve one pending report every 15 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setReports(prev => {
+        const pending = prev.filter(r => r.status === "pending");
+        if (pending.length === 0) return prev;
+        const target = pending[Math.floor(Math.random() * pending.length)];
+        return prev.map(r =>
+          r.id === target.id ? { ...r, status: "resolved" } : r
+        );
+      });
+    }, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Check if API Key is configured
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
   const isApiKeyConfigured = apiKey && apiKey !== "your_key_here";
@@ -78,6 +135,13 @@ export default function App() {
           borderBottom: "1px solid rgba(255,255,255,0.06)"
         }}
       >
+        <div
+          className="absolute bottom-0 left-0 right-0"
+          style={{
+            height: "1px",
+            background: "linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.4) 50%, transparent 100%)"
+          }}
+        />
         {/* Left — Branding */}
         <div className="flex items-center gap-3">
           <div className="relative flex items-center justify-center">
@@ -91,7 +155,7 @@ export default function App() {
             />
           </div>
           <div className="flex items-center gap-1 tracking-[0.2em] text-sm font-bold uppercase">
-            <span style={{ color: "#C9A84C" }}>STADIUM</span>
+            <span style={{ color: "#C9A84C", textShadow: "0 0 12px rgba(201,168,76,0.3)" }}>STADIUM</span>
             <span className="text-white">PULSE</span>
           </div>
           <span
@@ -122,7 +186,7 @@ export default function App() {
         {/* Right — Clock */}
         <div className="flex items-center gap-1.5">
           <span
-            className="font-mono text-sm font-semibold"
+            className="font-mono text-sm font-semibold tnum"
             style={{ color: "#C9A84C" }}
           >
             {timeStr}
@@ -195,8 +259,7 @@ export default function App() {
         }}
       >
         STADIUM PULSE &nbsp;•&nbsp; FIFA WORLD CUP 2026 &nbsp;•&nbsp; POWERED
-        BY GEMINI AI &nbsp;•&nbsp; JAI JOHAR! 🏟️ &nbsp;•&nbsp; BUILT BY
-        AYUSHMAN SHARMA
+        BY GEMINI AI &nbsp;•&nbsp; BUILT BY AYUSHMAN SHARMA
       </footer>
     </div>
   );

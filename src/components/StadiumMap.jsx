@@ -48,6 +48,20 @@ export default function StadiumMap({ reports, selectedZone, onSelectZone }) {
           {/* Background */}
           <rect width="600" height="400" fill="rgba(5,10,26,0.95)" />
 
+          {/* Floodlight cones */}
+          <defs>
+            <radialGradient id="floodlightL" cx="0" cy="0" r="0.6">
+              <stop offset="0%" stopColor="rgba(201,168,76,0.10)" />
+              <stop offset="100%" stopColor="rgba(201,168,76,0)" />
+            </radialGradient>
+            <radialGradient id="floodlightR" cx="1" cy="0" r="0.6">
+              <stop offset="0%" stopColor="rgba(201,168,76,0.10)" />
+              <stop offset="100%" stopColor="rgba(201,168,76,0)" />
+            </radialGradient>
+          </defs>
+          <rect width="300" height="400" fill="url(#floodlightL)" />
+          <rect x="300" width="300" height="400" fill="url(#floodlightR)" />
+
           {/* Subtle grid */}
           <defs>
             <pattern id="spgrid" width="30" height="30" patternUnits="userSpaceOnUse">
@@ -83,13 +97,19 @@ export default function StadiumMap({ reports, selectedZone, onSelectZone }) {
             strokeWidth="1.5"
           />
 
-          {/* Pitch — dark turf */}
+          {/* Pitch — dark turf with mowing stripes */}
+          <defs>
+            <pattern id="mowing" width="30" height="140" patternUnits="userSpaceOnUse">
+              <rect width="15" height="140" fill="#0D2B14" />
+              <rect x="15" width="15" height="140" fill="#0F3020" />
+            </pattern>
+          </defs>
           <rect
             x="180"
             y="130"
             width="240"
             height="140"
-            fill="#0D2B14"
+            fill="url(#mowing)"
             stroke="rgba(255,255,255,0.12)"
             strokeWidth="1.5"
             rx="6"
@@ -208,7 +228,7 @@ export default function StadiumMap({ reports, selectedZone, onSelectZone }) {
                 onClick={() => onSelectZone(isSelected ? null : zone.id)}
                 className="cursor-pointer"
               >
-                {/* Gold selection ring */}
+                {/* Gold selection ring (rotating) */}
                 {isSelected && (
                   <ellipse
                     cx={cx}
@@ -220,6 +240,7 @@ export default function StadiumMap({ reports, selectedZone, onSelectZone }) {
                     strokeWidth="2.5"
                     strokeDasharray="5 3"
                     opacity="0.8"
+                    className="ring-spin"
                   />
                 )}
 
