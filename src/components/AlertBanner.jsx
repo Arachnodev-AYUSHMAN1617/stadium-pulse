@@ -1,84 +1,97 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { Compass, Accessibility, Users, Leaf, Bus, ShieldAlert, X } from "lucide-react";
 
-export default function AlertBanner({ isVisible, onClose, language = "en" }) {
-  const [shouldRender, setShouldRender] = useState(isVisible);
+const categoryIcons = {
+  navigation: Compass,
+  accessibility: Accessibility,
+  crowd: Users,
+  sustainability: Leaf,
+  transport: Bus,
+  security: ShieldAlert
+};
 
-  useEffect(() => {
-    if (isVisible) {
-      setShouldRender(true);
-    }
-  }, [isVisible]);
+const severityStyles = {
+  low: {
+    border: "border-l-4 border-l-emerald-400 border-gray-800",
+    badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    text: "text-emerald-400"
+  },
+  medium: {
+    border: "border-l-4 border-l-amber-400 border-gray-800",
+    badge: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    text: "text-amber-400"
+  },
+  high: {
+    border: "border-l-4 border-l-red-500 border-gray-800",
+    badge: "bg-red-500/10 text-red-400 border-red-500/20",
+    text: "text-red-400"
+  }
+};
 
-  if (!shouldRender) return null;
+export default function AlertBanner({ isVisible, isLoading, alertData, onClose }) {
+  if (!isVisible) return null;
 
-  const langNames = {
-    en: "EN • English",
-    hi: "HI • हिन्दी",
-    es: "ES • Español",
-    ar: "AR • العربية",
-    cg: "CG • छत्तीसगढ़ी"
-  };
+  // Render shimmer effect if loading
+  if (isLoading) {
+    return (
+      <div className="absolute top-0 left-0 right-0 z-20 m-4 rounded-xl border border-gray-800 bg-gray-900/95 p-4 shadow-xl backdrop-blur-md animate-pulse">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-5 w-16 bg-gray-800 rounded"></div>
+            <div className="h-5 w-24 bg-gray-800 rounded"></div>
+          </div>
+          <div className="h-5 w-5 bg-gray-800 rounded-full"></div>
+        </div>
+        <div className="mt-3 space-y-2">
+          <div className="h-4 w-full bg-gray-700 rounded"></div>
+          <div className="h-4 w-5/6 bg-gray-700 rounded"></div>
+        </div>
+        <div className="mt-4 h-3 w-32 bg-gray-800 rounded"></div>
+      </div>
+    );
+  }
+
+  if (!alertData) return null;
+
+  const { severity = "low", fanAlert = "", category = "navigation", estimatedResolutionMins = 10 } = alertData;
+  const styles = severityStyles[severity.toLowerCase()] || severityStyles.low;
+  const CategoryIcon = categoryIcons[category.toLowerCase()] || Compass;
 
   return (
-    <div
-      className={`fixed top-24 left-1/2 z-40 w-full max-w-md -translate-x-1/2 px-4 transition-all duration-500 ease-out transform ${
-        isVisible
-          ? "translate-y-0 opacity-100 scale-100"
-          : "-translate-y-12 opacity-0 scale-95 pointer-events-none"
-      }`}
-      onTransitionEnd={() => {
-        if (!isVisible) setShouldRender(false);
-      }}
-    >
-      <div className="relative overflow-hidden rounded-xl border border-amber-500/30 bg-gray-900/95 p-4 shadow-xl shadow-amber-500/5 backdrop-blur-md">
-        {/* Decorative background glow */}
-        <div className="absolute -left-10 -top-10 h-24 w-24 rounded-full bg-amber-500/10 blur-xl"></div>
-        
-        <div className="flex items-start gap-3">
-          {/* Animated Spinner Icon */}
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-500/20 text-xl text-amber-400">
-            <svg
-              className="h-5 w-5 animate-spin"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
+    <div className="absolute top-0 left-0 right-0 z-20 m-4 transition-all duration-300 transform translate-y-0 opacity-100">
+      <div className={`relative overflow-hidden rounded-xl bg-gray-900/95 p-4 shadow-xl backdrop-blur-md border ${styles.border}`}>
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors cursor-pointer"
+          aria-label="Dismiss banner"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        <div className="flex flex-col gap-2.5">
+          {/* Header Row */}
+          <div className="flex items-center gap-2">
+            {/* Severity badge */}
+            <span className={`rounded-md border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${styles.badge}`}>
+              {severity}
+            </span>
+            {/* Category badge */}
+            <span className="flex items-center gap-1 rounded-md border border-gray-800 bg-gray-950 px-2 py-0.5 text-[10px] font-bold text-gray-300 uppercase">
+              <CategoryIcon className="h-3 w-3 text-emerald-400" />
+              {category}
+            </span>
           </div>
 
-          <div className="flex-1">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-white text-sm">AI Agent Synthesizing</h3>
-              <span className="rounded bg-gray-800 px-2 py-0.5 text-[10px] font-bold text-gray-400 border border-gray-700">
-                {langNames[language] || language.toUpperCase()}
-              </span>
-            </div>
-            <p className="mt-1 text-xs text-gray-300">
-              AI is analyzing your report and cross-referencing zone crowd density to push safety alerts...
-            </p>
-          </div>
+          {/* Fan Alert Message */}
+          <p className="pr-8 text-sm font-bold text-white leading-relaxed">
+            {fanAlert}
+          </p>
 
-          {/* Close Button */}
-          <button
-            onClick={onClose}
-            className="flex h-6 w-6 items-center justify-center rounded-md text-gray-400 hover:bg-gray-800 hover:text-white transition-colors"
-            aria-label="Dismiss alert"
-          >
-            ✕
-          </button>
+          {/* Estimated Resolution Time */}
+          <div className="mt-1 text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+            Estimated Resolution: <span className="text-gray-400 font-bold">{estimatedResolutionMins} mins</span>
+          </div>
         </div>
       </div>
     </div>

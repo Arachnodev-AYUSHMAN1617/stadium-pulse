@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Radio, AlertTriangle, Trophy } from "lucide-react";
 import ViewSwitcher from "./components/ViewSwitcher";
 import FanView from "./components/FanView";
 import AILayerView from "./components/AILayerView";
@@ -10,9 +11,22 @@ export default function App() {
   const [reports, setReports] = useState(seedReports);
   const [selectedLanguage, setSelectedLanguage] = useState("en");
   const [selectedZoneFilter, setSelectedZoneFilter] = useState(null);
-  const [isAiAnalyzing, setIsAiAnalyzing] = useState(false);
+  const [geminiLogs, setGeminiLogs] = useState([]);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Add new report from fan
+  // Clock trigger updating every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Check if API Key is configured
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const isApiKeyConfigured = apiKey && apiKey !== "your_key_here";
+
+  // Add new report
   const addReport = (newReportData) => {
     const newReport = {
       id: `rep-${Date.now()}`,
@@ -23,12 +37,6 @@ export default function App() {
     
     // Prepend new report to state
     setReports((prev) => [newReport, ...prev]);
-    
-    // Simulate AI synthesis process with banner
-    setIsAiAnalyzing(true);
-    setTimeout(() => {
-      setIsAiAnalyzing(false);
-    }, 4500);
   };
 
   // Update status (e.g. resolve reports by staff)
@@ -42,11 +50,38 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-950 font-sans antialiased text-gray-100 flex flex-col selection:bg-emerald-500 selection:text-gray-950">
-      {/* Top sticky switcher navigation */}
+      {/* Header (56px height) */}
+      <header className="h-14 w-full border-b border-gray-800 bg-gray-950 flex items-center justify-between px-4 shrink-0">
+        {/* Left branding */}
+        <div className="flex items-center gap-2">
+          <Radio className="h-5 w-5 text-emerald-400 animate-pulse" />
+          <span className="font-semibold text-white tracking-tight text-base sm:text-lg">
+            Stadium Pulse
+          </span>
+          <span className="rounded bg-gray-800 px-2 py-0.5 text-[9px] font-bold text-gray-500 uppercase tracking-widest border border-gray-700">
+            FIFA WC 2026
+          </span>
+        </div>
+
+        {/* Right live clock */}
+        <div className="text-xs text-gray-400 font-mono">
+          {currentTime.toLocaleTimeString()}
+        </div>
+      </header>
+
+      {/* ViewSwitcher tabs below header */}
       <ViewSwitcher activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      {/* Main active view rendering */}
-      <main className="flex-1 pb-16">
+      {/* Global Warning Banner if Gemini API Key is missing */}
+      {!isApiKeyConfigured && (
+        <div className="bg-amber-500/10 border-b border-amber-500/25 px-4 py-2 text-xs text-amber-400 flex items-center justify-center gap-2">
+          <AlertTriangle className="h-4 w-4 shrink-0 animate-pulse" />
+          <span>Add your Gemini API key to .env to enable AI features</span>
+        </div>
+      )}
+
+      {/* Main content area */}
+      <main className="flex-1">
         {activeTab === "fan" && (
           <FanView
             reports={reports}
@@ -55,13 +90,13 @@ export default function App() {
             setSelectedLanguage={setSelectedLanguage}
             selectedZoneFilter={selectedZoneFilter}
             setSelectedZoneFilter={setSelectedZoneFilter}
-            isAiAnalyzing={isAiAnalyzing}
-            setIsAiAnalyzing={setIsAiAnalyzing}
+            geminiLogs={geminiLogs}
+            setGeminiLogs={setGeminiLogs}
           />
         )}
 
         {activeTab === "ai" && (
-          <AILayerView reports={reports} />
+          <AILayerView geminiLogs={geminiLogs} />
         )}
 
         {activeTab === "staff" && (
@@ -75,8 +110,9 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full border-t border-gray-900 bg-gray-950 py-6 text-center text-[10px] font-semibold tracking-wider text-gray-600">
-        ⚽ FIFA WORLD CUP 2026 STADIUM PULSE • CROWD-SOURCED INTELLIGENCE
+      <footer className="w-full border-t border-gray-900 bg-gray-950 py-4 flex items-center justify-center gap-1.5 text-xs text-gray-600">
+        <span>Stadium Pulse • Built for FIFA World Cup 2026 • Powered by Gemini AI • Jai Johar!</span>
+        <Trophy className="h-3.5 w-3.5 text-gray-700" />
       </footer>
     </div>
   );

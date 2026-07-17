@@ -1,112 +1,115 @@
 import React from "react";
+import { Brain } from "lucide-react";
 import stadiumZones from "../data/stadiumZones";
 
-export default function AILayerView({ reports }) {
-  const pendingCount = reports.filter((r) => r.status === "pending").length;
+export default function AILayerView({ geminiLogs }) {
+  const truncatedPrompt = (text) => {
+    if (!text) return "";
+    return text.length > 100 ? text.substring(0, 100) + "..." : text;
+  };
 
-  const systemPrompt = `You are a Stadium Intelligence AI assistant for FIFA World Cup 2026.
-Your job is to read raw crowd-sourced fan reports in multiple languages (English, Spanish, Hindi, Arabic, Chhattisgarhi),
-cross-reference them with zone coordinates/densities, resolve naming ambiguities,
-and produce structured, actionable emergency and crowd-control alerts.
-
-Format your output EXACTLY as a JSON object:
-{
-  "criticalAlert": boolean,
-  "headline": string (short alert title in fan's language),
-  "detailedMessage": string (detailed description of what's happening and advice),
-  "recommendedAction": string (action plan for staff),
-  "urgencyScore": number (1-10)
-}`;
+  const getSeverityClass = (severity) => {
+    if (!severity) return "text-emerald-400";
+    const s = severity.toLowerCase();
+    if (s === "high") return "text-red-500 font-bold";
+    if (s === "medium") return "text-amber-400 font-bold";
+    return "text-emerald-400 font-bold";
+  };
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-6 text-white">
-      <div className="mb-6">
-        <h2 className="text-xl font-bold tracking-tight">🤖 Gemini AI Synthesis Layer</h2>
-        <p className="text-xs text-gray-400">
-          Day 1 Prototype: Configured endpoints and system prompt schemas.
-        </p>
+    <div className="mx-auto w-full max-w-5xl px-4 py-6 font-mono text-sm text-gray-300">
+      {/* Header */}
+      <div className="mb-6 flex items-center justify-between border-b border-gray-800 pb-4">
+        <div className="flex items-center gap-2.5">
+          <span className="relative flex h-3 w-3">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500"></span>
+          </span>
+          <h2 className="text-base font-bold text-white uppercase tracking-wider">
+            Gemini 2.0 Flash — Live Pipeline Monitor
+          </h2>
+        </div>
+        <span className="rounded bg-gray-900 border border-gray-800 px-3 py-1 text-xs text-gray-500">
+          LOGS COUNT: {geminiLogs.length}
+        </span>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-        {/* Left Column: API Config */}
-        <div className="space-y-6 md:col-span-1">
-          <div className="rounded-2xl border border-gray-800 bg-gray-900/40 p-5 backdrop-blur-sm">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-emerald-400">
-              ⚡ Model Config
-            </h3>
-            <div className="mt-4 space-y-3.5 text-xs">
-              <div>
-                <label className="text-gray-500 font-bold block mb-1">Target Endpoint</label>
-                <div className="font-mono bg-gray-950 px-2.5 py-1.5 rounded border border-gray-800 break-all select-all">
-                  gemini-2.0-flash
-                </div>
-              </div>
-              <div>
-                <label className="text-gray-500 font-bold block mb-1">API Key Env</label>
-                <div className="font-mono bg-gray-950 px-2.5 py-1.5 rounded border border-gray-800 text-amber-500">
-                  VITE_GEMINI_API_KEY
-                </div>
-              </div>
-              <div>
-                <label className="text-gray-500 font-bold block mb-1">Status</label>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-black text-emerald-400 border border-emerald-500/25">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  READY
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-gray-800 bg-gray-900/40 p-5 backdrop-blur-sm">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-sky-400">
-              📊 Live Pipe Metrics
-            </h3>
-            <div className="mt-4 grid grid-cols-2 gap-4 text-center">
-              <div className="rounded-lg bg-gray-950 p-3 border border-gray-800/60">
-                <span className="block text-2xl font-black text-white">{reports.length}</span>
-                <span className="text-[10px] text-gray-500 uppercase font-bold">Total Signals</span>
-              </div>
-              <div className="rounded-lg bg-gray-950 p-3 border border-gray-800/60">
-                <span className="block text-2xl font-black text-amber-400">{pendingCount}</span>
-                <span className="text-[10px] text-gray-500 uppercase font-bold">Unprocessed</span>
-              </div>
-            </div>
-          </div>
+      {/* Main logs pipeline */}
+      {geminiLogs.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-gray-800 bg-gray-900/50 py-16 text-center">
+          <Brain className="h-12 w-12 text-gray-600 mb-4 animate-pulse" />
+          <p className="text-gray-500 max-w-xs">
+            No AI calls yet. Submit a report in Fan View to see the pipeline.
+          </p>
         </div>
+      ) : (
+        <div className="space-y-4">
+          {geminiLogs.slice(0, 5).map((log, index) => {
+            const isError = log.response && log.response.error;
+            const severity = log.response?.severity || "low";
+            const severityColor = getSeverityClass(severity);
+            const zoneName = stadiumZones.find(z => z.id === log.zone)?.name || log.zone;
 
-        {/* Right Column: Prompt & Real-time Logs */}
-        <div className="space-y-6 md:col-span-2">
-          {/* Prompt Schema */}
-          <div className="rounded-2xl border border-gray-800 bg-gray-900/40 p-5 backdrop-blur-sm">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-              📝 System Prompt (Instructions)
-            </h3>
-            <pre className="mt-3 overflow-x-auto rounded-lg bg-gray-950 p-3.5 font-mono text-[10px] leading-relaxed text-gray-300 border border-gray-800/80 whitespace-pre-wrap">
-              {systemPrompt}
-            </pre>
-          </div>
-
-          {/* Synthetic Logs */}
-          <div className="rounded-2xl border border-gray-800 bg-gray-900/40 p-5 backdrop-blur-sm">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-              📟 Active Pipeline Logs
-            </h3>
-            <div className="mt-3 space-y-2 font-mono text-[10px] text-gray-400">
-              <div className="rounded bg-gray-950 p-3 border border-gray-800/60 max-h-52 overflow-y-auto space-y-1.5">
-                <div>[INFO] {new Date().toISOString()} - System initialised. Listening to client event hooks...</div>
-                <div>[INFO] Loaded {stadiumZones.length} Zone coordinate references successfully.</div>
-                <div>[INFO] Seeded {reports.length} report inputs dynamically to local storage.</div>
-                {reports.slice(-3).map((r, i) => (
-                  <div key={i} className="text-emerald-400">
-                    [SIGNAL] Raw report captured! ID: {r.id} | Zone: {r.zone} | Type: {r.type} | Lang: {r.language.toUpperCase()}
+            return (
+              <div
+                key={index}
+                className="rounded-xl border border-gray-800 bg-gray-900 p-4 shadow-lg flex flex-col gap-3"
+              >
+                {/* Top metadata row */}
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-800 pb-2.5 text-xs text-gray-500">
+                  <div className="flex items-center gap-3">
+                    <span className="text-emerald-400 font-bold">
+                      [{new Date(log.timestamp).toLocaleTimeString()}]
+                    </span>
+                    <span className="text-white font-semibold">
+                      {log.reportType}
+                    </span>
+                    <span className="text-gray-400">
+                      Zone: {zoneName}
+                    </span>
                   </div>
-                ))}
-                <div>[INFO] Awaiting Day 2 API implementation to begin content token streams...</div>
+                  <span className="rounded bg-gray-950 px-2 py-0.5 text-[10px] font-bold text-gray-400 border border-gray-800 uppercase">
+                    Lang: {log.language}
+                  </span>
+                </div>
+
+                {/* Prompt block */}
+                <div className="bg-gray-950 rounded-lg p-3 border border-gray-800">
+                  <span className="text-gray-500 font-bold block mb-1">PROMPT →</span>
+                  <p className="text-gray-300 font-mono text-xs whitespace-pre-wrap leading-relaxed select-all">
+                    {truncatedPrompt(log.prompt)}
+                  </p>
+                </div>
+
+                {/* Response JSON block */}
+                <div className="bg-gray-950 rounded-lg p-3 border border-gray-800">
+                  <span className="text-emerald-400 font-bold block mb-1">RESPONSE →</span>
+                  {isError ? (
+                    <pre className="text-red-500 font-mono text-xs leading-relaxed">
+                      {JSON.stringify(log.response, null, 2)}
+                    </pre>
+                  ) : (
+                    <pre className="text-gray-400 font-mono text-xs leading-relaxed overflow-x-auto whitespace-pre-wrap">
+                      {"{\n"}
+                      {`  "severity": `}
+                      <span className={severityColor}>"{log.response.severity}"</span>
+                      {",\n  \"fanAlert\": "}
+                      <span className="text-white">"{log.response.fanAlert}"</span>
+                      {",\n  \"staffAction\": "}
+                      <span className="text-amber-400">"{log.response.staffAction}"</span>
+                      {",\n  \"category\": "}
+                      <span className="text-emerald-400">"{log.response.category}"</span>
+                      {",\n  \"estimatedResolutionMins\": "}
+                      <span className="text-indigo-400">{log.response.estimatedResolutionMins}</span>
+                      {"\n}"}
+                    </pre>
+                  )}
+                </div>
               </div>
-            </div>
-          </div>
+            );
+          })}
         </div>
-      </div>
+      )}
     </div>
   );
 }

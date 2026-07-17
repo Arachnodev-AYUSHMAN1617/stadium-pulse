@@ -1,5 +1,20 @@
 import React, { useState } from "react";
+import {
+  DoorOpen,
+  Accessibility,
+  Trash2,
+  Bus,
+  UtensilsCrossed,
+  ShieldAlert,
+  Droplets,
+  UserX,
+  AlertTriangle,
+  Loader2,
+  XCircle,
+  Compass
+} from "lucide-react";
 import stadiumZones from "../data/stadiumZones";
+import AlertBanner from "./AlertBanner";
 
 // Translations dictionary
 const translations = {
@@ -8,7 +23,7 @@ const translations = {
     selectZonePrompt: "Where is this happening?",
     chooseZonePlaceholder: "Select a Stadium Zone...",
     submitBtn: "Submit Report",
-    recentFeedTitle: "Recent Live Intelligence",
+    recentFeedTitle: "Recent Intelligence",
     noReports: "No reports filed yet.",
     filteringZone: "Filtering by",
     clearFilter: "Clear Filter",
@@ -17,7 +32,7 @@ const translations = {
     hrAgo: "h ago",
     pending: "Pending",
     resolved: "Resolved",
-    selectCategory: "Select a condition above to begin report",
+    selectCategory: "Select a category above to begin report",
     statusText: "Status",
     zoneLabel: "Zone",
     timeLabel: "Reported"
@@ -27,7 +42,7 @@ const translations = {
     selectZonePrompt: "यह कहाँ हो रहा है?",
     chooseZonePlaceholder: "स्टेडियम क्षेत्र चुनें...",
     submitBtn: "रिपोर्ट जमा करें",
-    recentFeedTitle: "हालिया लाइव इंटेलिजेंस",
+    recentFeedTitle: "हालिया लाइव रिपोर्ट",
     noReports: "अभी तक कोई रिपोर्ट नहीं है।",
     filteringZone: "फिल्टर किया गया",
     clearFilter: "फिल्टर हटाएं",
@@ -46,7 +61,7 @@ const translations = {
     selectZonePrompt: "¿Dónde está sucediendo esto?",
     chooseZonePlaceholder: "Seleccione una zona del estadio...",
     submitBtn: "Enviar Reporte",
-    recentFeedTitle: "Inteligencia Reciente en Vivo",
+    recentFeedTitle: "Inteligencia Reciente",
     noReports: "No hay reportes enviados.",
     filteringZone: "Filtrando por",
     clearFilter: "Limpiar Filtro",
@@ -65,7 +80,7 @@ const translations = {
     selectZonePrompt: "أين يحدث هذا؟",
     chooseZonePlaceholder: "اختر منطقة بالملعب...",
     submitBtn: "إرسال البلاغ",
-    recentFeedTitle: "معلومات الاستخبارات الحية الأخيرة",
+    recentFeedTitle: "التقارير الأخيرة",
     noReports: "لا توجد بلاغات حتى الآن.",
     filteringZone: "تصفية حسب",
     clearFilter: "مسح التصفية",
@@ -84,7 +99,7 @@ const translations = {
     selectZonePrompt: "इहा कहाँ होवत हे?",
     chooseZonePlaceholder: "स्टेडियम के कोना चुनव...",
     submitBtn: "रपोट भेजव",
-    recentFeedTitle: "अभी-अभी के लाइव खबर",
+    recentFeedTitle: "अभी के खबर",
     noReports: "अभी तक कोनो रपोट नई आये हे।",
     filteringZone: "कोना के आधार पर",
     clearFilter: "फिल्टर साफ करव",
@@ -100,16 +115,16 @@ const translations = {
   }
 };
 
-// Report category mappings with emojis and localized text
+// Report type buttons with Lucide React Icons
 const reportTypes = [
-  { id: "Crowded Gate", emoji: "🚪", translationKeys: { en: "Crowded Gate", hi: "भीड़भाड़ वाला गेट", es: "Puerta Abarrotada", ar: "بوابة مزدحمة", cg: "भीड़भाड़ वाला फाटक" } },
-  { id: "Blocked Ramp", emoji: "♿", translationKeys: { en: "Blocked Ramp", hi: "अवरुद्ध रैंप", es: "Rampa Bloqueada", ar: "منحدر مغلق", cg: "घेरायल रैंप" } },
-  { id: "Full Bin", emoji: "🗑️", translationKeys: { en: "Full Bin", hi: "भरा हुआ कचरा डिब्बा", es: "Contenedor Lleno", ar: "سلة مهملات ممتلئة", cg: "कचरा पेटी भरगे" } },
-  { id: "Shuttle Delay", emoji: "🚌", translationKeys: { en: "Shuttle Delay", hi: "शटल सेवा में देरी", es: "Retraso de Bus", ar: "تأخر الحافلة", cg: "शटल गाड़ी देरी" } },
-  { id: "Food Line", emoji: "🍔", translationKeys: { en: "Food Line", hi: "भोजन की लंबी कतार", es: "Fila de Comida", ar: "طابور الطعام", cg: "खाए के लाइन" } },
-  { id: "Security Queue", emoji: "🔒", translationKeys: { en: "Security Queue", hi: "सुरक्षा जांच कतार", es: "Fila de Seguridad", ar: "طابور الأمن", cg: "सुरक्षा जांच लाइन" } },
-  { id: "Water Station", emoji: "💧", translationKeys: { en: "Water Station", hi: "पेयजल केंद्र", es: "Estación de Agua", ar: "محطة مياه", cg: "पानी टंकी" } },
-  { id: "Lost Person", emoji: "🆘", translationKeys: { en: "Lost Person", hi: "खोया हुआ व्यक्ति", es: "Persona Perdida", ar: "شخص مفقود", cg: "हराय गे मनखे" } }
+  { id: "Crowded Gate", Icon: DoorOpen, translationKeys: { en: "Crowded Gate", hi: "भीड़भाड़ वाला गेट", es: "Puerta Abarrotada", ar: "بوابة مزدحمة", cg: "भीड़भाड़ वाला फाटक" } },
+  { id: "Blocked Ramp", Icon: Accessibility, translationKeys: { en: "Blocked Ramp", hi: "अवरुद्ध रैंप", es: "Rampa Bloqueada", ar: "منحدر مغلق", cg: "घेरायल रैंप" } },
+  { id: "Full Bin", Icon: Trash2, translationKeys: { en: "Full Bin", hi: "भरा हुआ कचरा डिब्बा", es: "Contenedor Lleno", ar: "سلة مهملات ممتلئة", cg: "कचरा पेटी भरगे" } },
+  { id: "Shuttle Delay", Icon: Bus, translationKeys: { en: "Shuttle Delay", hi: "शटल सेवा में देरी", es: "Retraso de Bus", ar: "تأخر الحافلة", cg: "शटल गाड़ी देरी" } },
+  { id: "Food Line", Icon: UtensilsCrossed, translationKeys: { en: "Food Line", hi: "भोजन की लंबी कतार", es: "Fila de Comida", ar: "طابور الطعام", cg: "खाए के लाइन" } },
+  { id: "Security Queue", Icon: ShieldAlert, translationKeys: { en: "Security Queue", hi: "सुरक्षा जांच कतार", es: "Fila de Seguridad", ar: "طابور الأمن", cg: "सुरक्षा जांच लाइन" } },
+  { id: "Water Station", Icon: Droplets, translationKeys: { en: "Water Station", hi: "पेयजल केंद्र", es: "Estación de Agua", ar: "محطة मياه", cg: "पानी टंकी" } },
+  { id: "Lost Person", Icon: UserX, translationKeys: { en: "Lost Person", hi: "खोया हुआ व्यक्ति", es: "Persona Perdida", ar: "شخص مفقود", cg: "हराय गे मनखे" } }
 ];
 
 export default function ReportPanel({
@@ -118,27 +133,139 @@ export default function ReportPanel({
   selectedLanguage,
   setSelectedLanguage,
   selectedZoneFilter,
-  setSelectedZoneFilter
+  setSelectedZoneFilter,
+  geminiLogs,
+  setGeminiLogs
 }) {
   const [selectedType, setSelectedType] = useState(null);
   const [selectedZone, setSelectedZone] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isAlertVisible, setIsAlertVisible] = useState(false);
+  const [alertData, setAlertData] = useState(null);
 
   const t = translations[selectedLanguage] || translations.en;
   const isRtl = selectedLanguage === "ar";
 
-  // Form submit handler
-  const handleSubmit = (e) => {
+  // Check if API Key is configured
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const isApiKeyConfigured = apiKey && apiKey !== "your_key_here";
+
+  // Form submit handler - wires real Gemini API calls
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedType || !selectedZone) return;
 
-    // Call add report logic
-    addReport({
-      type: selectedType,
+    setIsLoading(true);
+    setIsAlertVisible(true);
+    setAlertData(null);
+
+    const reportType = selectedType;
+    const language = selectedLanguage;
+    const zoneName = stadiumZones.find(z => z.id === selectedZone)?.name || selectedZone;
+
+    const promptText = `You are an AI operations assistant for FIFA World Cup 2026 
+stadium management. A fan has submitted a real-time report.
+
+Report details:
+- Type: ${reportType}
+- Zone: ${zoneName}
+- Language preference: ${language}
+- Time: ${new Date().toLocaleTimeString()}
+
+You must respond with a JSON object only, no markdown, no explanation. 
+Format:
+{
+  "severity": "low" | "medium" | "high",
+  "fanAlert": "short message to show the fan in their language (${language})",
+  "staffAction": "specific instruction for the nearest staff member",
+  "category": "navigation" | "accessibility" | "crowd" | "sustainability" | "transport" | "security",
+  "estimatedResolutionMins": number
+}
+
+For language codes: en=English, hi=Hindi, es=Spanish, ar=Arabic, 
+cg=Chhattisgarhi (write fanAlert in that language).
+Chhattisgarhi is spoken in Chhattisgarh, India — use simple 
+Chhattisgarhi phrases for the fanAlert when cg is selected.`;
+
+    let apiResult = null;
+    let logResponse = null;
+
+    if (!isApiKeyConfigured) {
+      // Key missing simulation fallback
+      await new Promise(r => setTimeout(r, 2000));
+      apiResult = {
+        severity: "medium",
+        fanAlert: language === "cg" ? "कृप्या ध्यान देव, रपोट दर्ज होगे हे।" : "Report filed. AI sandbox mode.",
+        staffAction: `Inspect ${zoneName} for ${reportType}. Check safety guidelines.`,
+        category: "navigation",
+        estimatedResolutionMins: 15
+      };
+      logResponse = apiResult;
+    } else {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [{ text: promptText }]
+              }],
+              generationConfig: { temperature: 0.3, maxOutputTokens: 300 }
+            })
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Gemini API error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        let rawText = data.candidates[0].content.parts[0].text;
+        
+        // Clean markdown format if returned
+        rawText = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+        apiResult = JSON.parse(rawText);
+        logResponse = apiResult;
+      } catch (err) {
+        console.error("Gemini fetch failed:", err);
+        apiResult = {
+          severity: "high",
+          fanAlert: "Error processing report. Please alert nearest security staff directly.",
+          staffAction: `URGENT check required at ${zoneName}: ${reportType}`,
+          category: "security",
+          estimatedResolutionMins: 5
+        };
+        logResponse = { error: err.message };
+      }
+    }
+
+    // Add entry to Gemini live pipeline logs
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      reportType,
       zone: selectedZone,
-      language: selectedLanguage
+      language,
+      prompt: promptText,
+      response: logResponse
+    };
+    setGeminiLogs(prev => [logEntry, ...prev]);
+
+    // Save alert data locally
+    setAlertData(apiResult);
+    setIsLoading(false);
+
+    // Call shared state to insert report with staffAction and severity metadata
+    addReport({
+      type: reportType,
+      zone: selectedZone,
+      language,
+      staffAction: apiResult.staffAction,
+      severity: apiResult.severity
     });
 
-    // Clear form
+    // Reset inputs
     setSelectedType(null);
     setSelectedZone("");
   };
@@ -162,15 +289,31 @@ export default function ReportPanel({
     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
     .slice(0, 5);
 
+  const getSeverityColor = (severity) => {
+    if (!severity) return "text-emerald-400";
+    const s = severity.toLowerCase();
+    if (s === "high") return "text-red-500";
+    if (s === "medium") return "text-amber-400";
+    return "text-emerald-400";
+  };
+
   return (
     <div
       style={{ direction: isRtl ? "rtl" : "ltr" }}
-      className="flex flex-col gap-6 w-full text-white"
+      className="relative flex flex-col gap-6 w-full text-white bg-gray-900 border border-gray-800 rounded-2xl p-5"
     >
+      {/* Alert Banner overlays inside Report Panel container */}
+      <AlertBanner
+        isVisible={isAlertVisible}
+        isLoading={isLoading}
+        alertData={alertData}
+        onClose={() => setIsAlertVisible(false)}
+      />
+
       {/* Top Section with Language Selector */}
       <div className="flex flex-col justify-between items-start gap-4 border-b border-gray-800 pb-4 sm:flex-row sm:items-center">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">{t.reportTitle}</h2>
+          <h2 className="text-lg font-bold tracking-tight text-white">{t.reportTitle}</h2>
           <p className="text-xs text-gray-400">
             {selectedZoneFilter
               ? `${t.filteringZone}: ${stadiumZones.find((z) => z.id === selectedZoneFilter)?.name}`
@@ -181,46 +324,52 @@ export default function ReportPanel({
         {/* Language selector */}
         <div className="flex flex-wrap gap-1.5 self-end sm:self-auto">
           {[
-            { code: "en", label: "EN • English" },
-            { code: "hi", label: "HI • हिन्दी" },
-            { code: "es", label: "ES • Español" },
-            { code: "ar", label: "AR • العربية" },
-            { code: "cg", label: "CG • छत्तीसगढ़ी" }
+            { code: "en", label: "EN" },
+            { code: "hi", label: "HI" },
+            { code: "es", label: "ES" },
+            { code: "ar", label: "AR" },
+            { code: "cg", label: "CG", tooltip: "Chhattisgarhi — छत्तीसगढ़ी" }
           ].map((lang) => (
-            <button
-              key={lang.code}
-              onClick={() => setSelectedLanguage(lang.code)}
-              className={`rounded-lg px-2.5 py-1 text-xs font-bold transition-all border ${
-                selectedLanguage === lang.code
-                  ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
-                  : "bg-gray-900 text-gray-400 border-gray-800 hover:text-white"
-              }`}
-            >
-              {lang.label}
-            </button>
+            <div key={lang.code} className="relative group/tooltip">
+              <button
+                onClick={() => setSelectedLanguage(lang.code)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all border min-h-[44px] ${
+                  selectedLanguage === lang.code
+                    ? "bg-emerald-500 text-black border-emerald-500 font-bold"
+                    : "bg-gray-800 text-gray-400 border-gray-700 hover:bg-gray-700 hover:text-white"
+                }`}
+              >
+                {lang.label}
+              </button>
+              {lang.tooltip && (
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block bg-gray-950 text-white text-[10px] py-1 px-2 rounded border border-gray-800 whitespace-nowrap z-30 shadow-lg font-sans">
+                  {lang.tooltip}
+                </div>
+              )}
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Grid of 8 Tap Buttons */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      {/* Grid of 8 Tap Buttons (Lucide Icons, No Emojis) */}
+      <div className="grid grid-cols-2 gap-3">
         {reportTypes.map((type) => {
           const isSelected = selectedType === type.id;
           const label = type.translationKeys[selectedLanguage] || type.translationKeys.en;
+          const IconComponent = type.Icon;
+
           return (
             <button
               key={type.id}
               onClick={() => setSelectedType(type.id)}
-              className={`group flex flex-col items-center justify-center gap-2 rounded-xl p-4 text-center transition-all duration-300 border ${
+              className={`group flex flex-col items-center justify-center gap-2 rounded-xl p-4 text-center transition-all duration-200 border min-h-[44px] ${
                 isSelected
-                  ? "bg-emerald-500/10 border-emerald-400 text-emerald-400 shadow-md shadow-emerald-500/5 scale-102"
-                  : "bg-gray-900/60 border-gray-800 hover:bg-gray-800/40 hover:border-gray-700"
+                  ? "bg-emerald-950 border-emerald-400 text-white shadow-lg"
+                  : "bg-gray-800 border-gray-700 hover:bg-gray-700 hover:border-emerald-500 hover:text-white"
               }`}
             >
-              <span className="text-3xl transition-transform duration-300 group-hover:scale-110">
-                {type.emoji}
-              </span>
-              <span className="text-xs font-bold leading-tight">{label}</span>
+              <IconComponent className={`h-6 w-6 transition-transform duration-200 group-hover:scale-110 ${isSelected ? 'text-white' : 'text-emerald-400'}`} />
+              <span className="text-sm font-semibold">{label}</span>
             </button>
           );
         })}
@@ -230,7 +379,7 @@ export default function ReportPanel({
       {selectedType && (
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col gap-4 rounded-xl border border-gray-800 bg-gray-900/40 p-4 animate-fadeIn"
+          className="flex flex-col gap-4 rounded-xl border border-gray-700 bg-gray-800/40 p-4"
         >
           <div className="flex flex-col gap-2">
             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">
@@ -240,7 +389,7 @@ export default function ReportPanel({
               value={selectedZone}
               onChange={(e) => setSelectedZone(e.target.value)}
               required
-              className="w-full rounded-lg border border-gray-800 bg-gray-950 px-3 py-2.5 text-sm text-white focus:border-emerald-500 focus:outline-none"
+              className="w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2.5 text-sm text-white focus:border-emerald-500 focus:outline-none min-h-[44px]"
             >
               <option value="" disabled>
                 {t.chooseZonePlaceholder}
@@ -253,30 +402,45 @@ export default function ReportPanel({
             </select>
           </div>
 
+          {/* Missing API Key Warning Block inside submit panel if configured incorrectly */}
+          {!isApiKeyConfigured && (
+            <div className="flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3 text-xs text-amber-400">
+              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+              <span>Add your Gemini API key to .env to enable AI features. Simulated responses will be used.</span>
+            </div>
+          )}
+
           <button
             type="submit"
-            disabled={!selectedZone}
-            className={`w-full rounded-lg py-3 text-sm font-bold text-gray-950 transition-all duration-300 ${
-              selectedZone
-                ? "bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 shadow-lg shadow-emerald-500/10 cursor-pointer"
+            disabled={!selectedZone || isLoading}
+            className={`w-full flex items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold text-black transition-all min-h-[44px] ${
+              selectedZone && !isLoading
+                ? "bg-emerald-500 hover:bg-emerald-400 cursor-pointer"
                 : "bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700"
             }`}
           >
-            {t.submitBtn}
+            {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+            <span>{isLoading ? "Analyzing..." : t.submitBtn}</span>
           </button>
         </form>
       )}
 
       {/* Recent Intelligence Feed */}
-      <div className="flex flex-col gap-3 rounded-xl border border-gray-800 bg-gray-900/20 p-4">
+      <div className="flex flex-col gap-3 rounded-xl border border-gray-800 bg-gray-950 p-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">
-            📢 {t.recentFeedTitle}
-          </h3>
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+            </span>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">
+              {t.recentFeedTitle}
+            </h3>
+          </div>
           {selectedZoneFilter && (
             <button
               onClick={() => setSelectedZoneFilter(null)}
-              className="text-[10px] font-bold text-sky-400 hover:underline"
+              className="text-[10px] font-bold text-sky-400 hover:underline cursor-pointer"
             >
               {t.clearFilter}
             </button>
@@ -284,9 +448,9 @@ export default function ReportPanel({
         </div>
 
         {recentReports.length === 0 ? (
-          <p className="py-4 text-center text-xs text-gray-500">{t.noReports}</p>
+          <p className="py-2 text-center text-xs text-gray-500">{t.noReports}</p>
         ) : (
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-2">
             {recentReports.map((report) => {
               const zoneObj = stadiumZones.find((z) => z.id === report.zone);
               const typeObj = reportTypes.find((t) => t.id === report.type);
@@ -294,26 +458,26 @@ export default function ReportPanel({
                 ? typeObj.translationKeys[selectedLanguage] || typeObj.translationKeys.en
                 : report.type;
 
+              const Icon = typeObj?.Icon || Compass;
               const isPending = report.status === "pending";
+              const severityColor = getSeverityColor(report.severity);
 
               return (
                 <div
                   key={report.id}
-                  className="flex items-center justify-between rounded-lg border border-gray-800/80 bg-gray-950/40 p-3 transition-colors hover:bg-gray-950/60"
+                  className="flex items-center justify-between rounded-lg border border-gray-800/80 bg-gray-900/60 p-3 transition-colors hover:bg-gray-900/80"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-xl">
-                      {typeObj?.emoji || "🔔"}
-                    </span>
+                    <Icon className={`h-4.5 w-4.5 shrink-0 ${severityColor}`} />
                     <div>
-                      <div className="text-xs font-bold text-white">{typeLabel}</div>
-                      <div className="mt-0.5 text-[10px] text-gray-400">
-                        {t.zoneLabel}: <span className="text-gray-300 font-semibold">{zoneObj?.name || report.zone}</span>
+                      <div className="text-sm font-medium text-white">{typeLabel}</div>
+                      <div className="text-[10px] text-gray-500 mt-0.5">
+                        {zoneObj?.name || report.zone}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-end gap-1.5">
+                  <div className="flex flex-col items-end gap-1">
                     <span
                       className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider border ${
                         isPending
