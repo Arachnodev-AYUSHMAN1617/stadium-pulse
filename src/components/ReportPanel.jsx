@@ -185,10 +185,19 @@ Format:
   "estimatedResolutionMins": number
 }
 
-For language codes: en=English, hi=Hindi, es=Spanish, ar=Arabic, 
-cg=Chhattisgarhi (write fanAlert in that language).
-Chhattisgarhi is spoken in Chhattisgarh, India — use simple 
-Chhattisgarhi phrases for the fanAlert when cg is selected.`;
+CRITICAL LANGUAGE INSTRUCTION:
+The fan's language preference is: ${language}
+You MUST write the fanAlert field in this exact language:
+- en → English
+- hi → हिंदी (Hindi script, Devanagari)
+- es → Español
+- ar → العربية (Arabic script, RTL)
+- cg → छत्तीसगढ़ी (Chhattisgarhi language, Devanagari script)
+      Example Chhattisgarhi phrases:
+      "गेट C मा भीड़ बाढ़त हे, कृपया गेट A के तरफ जावव"
+      "स्टाफ ला जानकारी दे दे गे हे, थोकन रुकव"
+      "तोर रपोट मिलगे, जल्दी मदद आही"
+      ONLY Chhattisgarhi in fanAlert when cg is selected. No English.`;
 
     let apiResult = null;
     let logResponse = null;
