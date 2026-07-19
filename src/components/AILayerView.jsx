@@ -48,7 +48,7 @@ export default function AILayerView({ geminiLogs }) {
           className="text-xs tracking-widest"
           style={{ color: "rgba(255,255,255,0.30)" }}
         >
-          GEMINI 2.5 FLASH — LIVE PIPELINE MONITOR
+          GEMINI 3.1 FLASH LITE — LIVE PIPELINE MONITOR
         </span>
         {geminiLogs.length > 0 ? (
           <div className="flex items-center gap-2">

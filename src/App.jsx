@@ -259,7 +259,7 @@ export default function App() {
         }}
       >
         STADIUM PULSE &nbsp;•&nbsp; FIFA WORLD CUP 2026 &nbsp;•&nbsp; POWERED
-        BY GEMINI AI &nbsp;•&nbsp; BUILT BY AYUSHMAN SHARMA
+        BY GEMINI AI &nbsp;•&nbsp; BUILT BY AYUSHMAN SHARMA &nbsp; •&nbsp; JAI JOHAR!🌾
       </footer>
     </div>
   );

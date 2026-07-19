@@ -1,16 +1,136 @@
-# React + Vite
+# Stadium Pulse 🏟️
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> Crowd-sourced stadium intelligence for FIFA World Cup 2026.  
+> Fans as sensors. Gemini AI as the synthesizer.
 
-Currently, two official plugins are available:
+**Live App:** [your-vercel-url]  
+**Built for:** PromptWars Virtual Challenge 4 - Google for Developers × Hack2Skill  
+**Built with:** Google Antigravity
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Chosen Vertical
+Stadium Operations & Fan Experience - covering all 8 parameters:
+Navigation, Crowd Management, Accessibility, Transportation, 
+Sustainability, Multilingual Assistance, Operational Intelligence, 
+Real-time Decision Support.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## The Problem
+70,000 fans. One stadium. Gate C is 4 minutes from a crowd crush.  
+Security has no idea. Staff are reacting to crises instead of 
+preventing them.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Every existing AI stadium tool does the same thing: you ask a 
+question, it answers. That's a search engine with extra steps.
+
+---
+
+## The Approach
+**One mechanism. Eight problems solved.**
+
+Fans tap to report real conditions (crowded gate, blocked ramp, 
+shuttle delay, etc). Gemini 2.5 Flash reads every signal, 
+classifies severity, and pushes the right alert to the right 
+person in their language - automatically.
+
+
+```bash
+FAN REPORT
+│
+▼
+┌─────────────────────────┐
+│   Gemini 2.5 Flash      │
+│   • Classify severity   │
+│   • Generate fan alert  │
+│   • Generate staff action│
+│   • Detect category     │
+└─────────────────────────┘
+│
+├──► Fan View (alert in their language)
+├──► Staff Dashboard (ranked incident + action)
+└──► AI Monitor (full pipeline log)
+```
+
+---
+
+## How It Works
+
+**Fan View** : Live SVG stadium heatmap showing zone congestion 
+in real time. Fans tap one of 8 report types, select a zone, 
+submit. Gemini fires immediately.
+
+**AI Monitor** : Full transparency view showing every Gemini 
+prompt sent and structured JSON response received. Judges and 
+admins can see exactly what the AI is doing.
+
+**Staff Dashboard** : Live ranked incident feed with 
+AI-pre-generated suggested actions per incident. One tap to 
+resolve.
+
+**Simulation Loop** : Auto-generates realistic fan reports 
+every 8-12 seconds so the platform feels live even without 
+real users.
+
+---
+
+## Languages Supported
+| Code | Language |
+|------|----------|
+| EN | English |
+| HI | Hindi |
+| ES | Spanish |
+| AR | Arabic (RTL) |
+| CG | Chhattisgarhi : छत्तीसगढ़ी |
+
+Chhattisgarhi is spoken by 18 million people in central India.  
+Stadium Pulse may be the first global hackathon tool to include it.
+
+---
+
+## Tech Stack
+- **Frontend:** React 18 + Vite
+- **Styling:** Tailwind CSS v3
+- **AI:** Gemini 3.1 Flash Lite (Google AI Studio)
+- **Built with:** Google Antigravity
+- **Deployment:** Vercel
+- **Icons:** Lucide React
+
+---
+
+## Assumptions
+- No real sensor infrastructure assumed , fan reports replace IoT
+- Demo uses seeded data + simulation loop to represent live activity
+- API key must be set in environment variables (never hardcoded)
+
+---
+
+## Setup
+
+```bash
+git clone https://github.com/Arachnodev-AYUSHMAN1617/stadium-pulse
+cd stadium-pulse
+npm install
+```
+
+Create `.env`:
+
+```bash
+VITE_GEMINI_API_KEY=your_key_here
+```
+
+```bash
+npm run dev
+```
+
+---
+
+## Security
+- API key loaded from environment variables only
+- Key never committed to repository (.gitignore enforced)
+- No user data stored or transmitted beyond Gemini API calls
+
+---
+
+*Jai Johar!🌾 - Built by AYUSHMAN SHARMA, Chhattisgarh, India*

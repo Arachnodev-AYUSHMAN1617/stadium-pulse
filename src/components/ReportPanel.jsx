@@ -99,35 +99,35 @@ const translations = {
   },
   cg: {
     reportTitle: "हाल-चाल के रपोट करव",
-    selectZonePrompt: "इहा कहाँ होवत हे?",
-    chooseZonePlaceholder: "स्टेडियम के कोना चुनव...",
-    submitBtn: "रपोट भेजव",
-    recentFeedTitle: "अभी के खबर",
-    noReports: "अभी तक कोनो रपोट नई आये हे।",
-    filteringZone: "कोना के आधार पर",
+    selectZonePrompt: "ए कोन डहार होत हे?",
+    chooseZonePlaceholder: "स्टेडियम के कोंटा चुनव...",
+    submitBtn: "रिपोर्ट भेजव",
+    recentFeedTitle: "अभीच्च के खबर",
+    noReports: "अभी तक कोनो रिपोर्ट नई आये हे।",
+    filteringZone: "कोंटा के आधार पर",
     clearFilter: "फिल्टर साफ करव",
-    justNow: "अभी-अभी",
+    justNow: "अभीच्चे",
     minAgo: "मिनट पहिली",
     hrAgo: "घंटा पहिली",
-    pending: "रुके हे",
-    resolved: "बनगे",
-    selectCategory: "रपोट चालू करे बर ऊपर कोनो एक हाल-चाल चुनव",
+    pending: "चलत हे",
+    resolved: "टर गे",
+    selectCategory: "रिपोर्ट करे बर ऊपर कोनो एक हाल-चाल चुनव",
     statusText: "हाल",
-    zoneLabel: "कोना",
+    zoneLabel: "कोंटा",
     timeLabel: "टेम"
   }
 };
 
 // ── Report type definitions (unchanged) ──────────────────────────────────────
 const reportTypes = [
-  { id: "Crowded Gate", Icon: DoorOpen, translationKeys: { en: "Crowded Gate", hi: "भीड़भाड़ वाला गेट", es: "Puerta Abarrotada", ar: "بوابة مزدحمة", cg: "भीड़भाड़ वाला फाटक" } },
-  { id: "Blocked Ramp", Icon: Accessibility, translationKeys: { en: "Blocked Ramp", hi: "अवरुद्ध रैंप", es: "Rampa Bloqueada", ar: "منحدر مغلق", cg: "घेरायल रैंप" } },
-  { id: "Full Bin", Icon: Trash2, translationKeys: { en: "Full Bin", hi: "भरा हुआ कचरा डिब्बा", es: "Contenedor Lleno", ar: "سلة مهملات ممتلئة", cg: "कचरा पेटी भरगे" } },
-  { id: "Shuttle Delay", Icon: Bus, translationKeys: { en: "Shuttle Delay", hi: "शटल सेवा में देरी", es: "Retraso de Bus", ar: "تأخر الحافلة", cg: "शटल गाड़ी देरी" } },
-  { id: "Food Line", Icon: UtensilsCrossed, translationKeys: { en: "Food Line", hi: "भोजन की लंबी कतार", es: "Fila de Comida", ar: "طابور الطعام", cg: "खाए के लाइन" } },
-  { id: "Security Queue", Icon: ShieldAlert, translationKeys: { en: "Security Queue", hi: "सुरक्षा जांच कतार", es: "Fila de Seguridad", ar: "طابور الأमन", cg: "सुरक्षा जांच लाइन" } },
+  { id: "Crowded Gate", Icon: DoorOpen, translationKeys: { en: "Crowded Gate", hi: "भीड़भाड़ वाला गेट", es: "Puerta Abarrotada", ar: "بوابة مزدحمة", cg: "भेर-भार वाले कपाट" } },
+  { id: "Blocked Ramp", Icon: Accessibility, translationKeys: { en: "Blocked Ramp", hi: "अवरुद्ध रैंप", es: "Rampa Bloqueada", ar: "منحدر مغلق", cg: "धंधाये रैंप" } },
+  { id: "Full Bin", Icon: Trash2, translationKeys: { en: "Full Bin", hi: "भरा हुआ कचरा डिब्बा", es: "Contenedor Lleno", ar: "سلة مهملات ممتلئة", cg: "कचरा डब्बा भरागे" } },
+  { id: "Shuttle Delay", Icon: Bus, translationKeys: { en: "Shuttle Delay", hi: "शटल सेवा में देरी", es: "Retraso de Bus", ar: "تأخر الحافلة", cg: "शटल गाड़ी म देरी" } },
+  { id: "Food Line", Icon: UtensilsCrossed, translationKeys: { en: "Food Line", hi: "भोजन की लंबी कतार", es: "Fila de Comida", ar: "طابور الطعام", cg: "खाए बर लाइन" } },
+  { id: "Security Queue", Icon: ShieldAlert, translationKeys: { en: "Security Queue", hi: "सुरक्षा जांच कतार", es: "Fila de Seguridad", ar: "طابور الأमन", cg: "सुरक्षा जांच बर लाइन" } },
   { id: "Water Station", Icon: Droplets, translationKeys: { en: "Water Station", hi: "पेयजल केंद्र", es: "Estación de Agua", ar: "محطة مياه", cg: "पानी टंकी" } },
-  { id: "Lost Person", Icon: UserX, translationKeys: { en: "Lost Person", hi: "खोया हुआ व्यक्ति", es: "Persona Perdida", ar: "شخص مفقود", cg: "हराय गे मनखे" } }
+  { id: "Lost Person", Icon: UserX, translationKeys: { en: "Lost Person", hi: "खोया हुआ व्यक्ति", es: "Persona Perdida", ar: "شخص مفقود", cg: "गवांए मनखे" } }
 ];
 
 export default function ReportPanel({
@@ -206,7 +206,7 @@ Chhattisgarhi phrases for the fanAlert when cg is selected.`;
     } else {
       try {
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
